@@ -1,5 +1,6 @@
 import React from 'react';
-import { Col, Form, Button, Modal } from 'react-bootstrap';
+import { Col, Form, Button, Modal, Table, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { BsTrash, BsPlus } from 'react-icons/bs';
 import PessoaService from '../../../service/pessoa/PessoaService';
 import ModalConfirm from '../../../directives/ModalConfirm';
 import Notification from '../../../directives/Notification';
@@ -15,6 +16,12 @@ class PessoaCad extends React.Component {
     this.onClose = props.onClose;
 
     this.service = new PessoaService();
+
+    this.columns = [
+      { label: 'Nome', model: 'nome', show: true },
+      { label: 'Telefone', model: 'telefone', width: '180', show: true },
+      { label: 'E-mail', model: 'email', width: '200', show: true }
+    ];
   }
 
   state = {
@@ -22,7 +29,8 @@ class PessoaCad extends React.Component {
     item: {
       nome: '',
       cpf: '',
-      dataNascimento: ''
+      dataNascimento: '',
+      contatos: []
     },
     modalConfirmarRemover: false,
     editando: false,
@@ -69,7 +77,8 @@ class PessoaCad extends React.Component {
       id: item.id,
       nome: item.nome,
       cpf: item.cpf.replace(/\D/g, ''),
-      dataNascimento: FormatterUtils.formatDataToUs(item.dataNascimento)
+      dataNascimento: FormatterUtils.formatDataToUs(item.dataNascimento),
+      contatos: item.contatos.map((c) => { c.telefone = c.telefone.replace(/\D/g, ''); return c; })
     };
 
     this.service.salvar(params)
@@ -126,6 +135,45 @@ class PessoaCad extends React.Component {
     this.setState({ item: item });
   };
 
+  onChangeCampoContato = (e) => {
+    let value = e.target.value;
+    let id = e.target.id.replace('campoContato-', '');
+    const name = e.target.name;
+    let item = this.state.item || {};
+
+    item.contatos[id][name] = value;
+    this.setState({ item: item });
+  };
+
+  removerContato = (index) => {
+    let item = this.state.item || {};
+    item.contatos.splice(index, 1);
+
+    this.setState({ item: item });
+  };
+
+  adicionarContato = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    let item = this.state.item || {};
+    let contatos = item.contatos;
+    contatos.push({
+      nome: '',
+      telefone: '',
+      email: '',
+      pessoa: {
+        id: item.id
+      }
+    });
+
+    this.setState({ item: { ...item, contatos: contatos } });
+  };
+
+  hasContatos = () => {
+    return this.state.item && this.state.item.contatos && this.state.item.contatos.length;
+  }
+
   render() {
     return (
       <>
@@ -181,6 +229,84 @@ class PessoaCad extends React.Component {
                     }
                   </InputMask>
                 </Form.Group>
+              </Form.Row>
+
+              <Form.Row>
+                {!this.hasContatos() ?
+                  <h5 style={{ margin: '20px auto' }}>Nenhum contato foi adicionado ainda. <a href="#" onClick={this.adicionarContato}>Adicionar</a></h5>
+                  :
+                  <>
+                    <Table hover>
+                      <thead>
+                        <tr>
+                          {this.columns.map((column, index) => (
+                            column.show &&
+                            <th key={index} width={column.width}>{column.label}</th>
+                          ))}
+                          <th width="60"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {this.state.item.contatos.map((item, index) => (
+                          <tr key={index}>
+                            <td>
+                              <Form.Control type="text" size="sm"
+                                placeholder="Nome" name="nome"
+                                onChange={this.onChangeCampoContato}
+                                defaultValue={item.nome}
+                                id={`campoContato-${index}`}
+                                required={true} />
+                            </td>
+                            <td>
+                              <InputMask mask="(99) 99999-9999"
+                                value={FormatterUtils.formatTelefone(item.telefone)}
+                                onChange={this.onChangeCampoContato}>
+                                {
+                                  (inputProps) => (
+                                    <Form.Control type="text" size="sm"
+                                      placeholder="Telefone" name="telefone"
+                                      {...inputProps}
+                                      required={true}
+                                      id={`campoContato-${index}`}
+                                      maxLength="23" />
+                                  )
+                                }
+                              </InputMask>
+                            </td>
+                            <td>
+                              <Form.Control type="email" size="sm"
+                                placeholder="E-mail" name="email"
+                                defaultValue={item.email}
+                                onChange={this.onChangeCampoContato}
+                                required={true}
+                                id={`campoContato-${index}`}
+                                maxLength="100" />
+                            </td>
+                            <td className="space-evenly">
+                              <OverlayTrigger placement="bottom"
+                                overlay={<Tooltip>Remover</Tooltip>}>
+                                <Button size="sm" variant="danger" onClick={() => this.removerContato(index)}>
+                                  <BsTrash />
+                                </Button>
+                              </OverlayTrigger>
+                            </td>
+                          </tr>
+                        ))}
+                        <tr>
+                          <td colspan="3"></td>
+                          <td className="space-evenly">
+                            <OverlayTrigger placement="bottom"
+                              overlay={<Tooltip>Adicionar</Tooltip>}>
+                              <Button size="sm" variant="success" onClick={this.adicionarContato}>
+                                <BsPlus />
+                              </Button>
+                            </OverlayTrigger>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </Table>
+                  </>
+                }
               </Form.Row>
             </Modal.Body>
             <Modal.Footer>

@@ -79,3 +79,7 @@ button>svg {
   margin: 24px auto !important;
   display: block !important;
 }
+
+.text-small {
+  font-size: 85%;
+}

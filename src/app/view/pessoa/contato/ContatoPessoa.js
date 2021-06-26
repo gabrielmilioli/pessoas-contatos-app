@@ -3,7 +3,7 @@ import { Card, Form, Button, Container, Spinner } from 'react-bootstrap';
 import ContatoPessoaService from '../../../service/pessoa/contato/ContatoPessoaService';
 import Notification from '../../../directives/Notification';
 import ContatoPessoaCad from './cadastro/ContatoPessoaCad';
-import ContatoList from './listagem/ContatoList';
+import ContatoPessoaList from './listagem/ContatoPessoaList';
 
 class ContatoPessoa extends React.Component {
 
@@ -106,7 +106,7 @@ class ContatoPessoa extends React.Component {
           {this.state.loading ?
             <Spinner animation="border" variant="primary" />
             :
-            <ContatoList page={this.state.page} reload={this.buscar} />
+            <ContatoPessoaList page={this.state.page} reload={this.buscar} />
           }
         </Container>
 

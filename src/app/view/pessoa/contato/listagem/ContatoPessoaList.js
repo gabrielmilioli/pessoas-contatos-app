@@ -7,7 +7,7 @@ import Notification from '../../../../directives/Notification';
 import ModalConfirm from '../../../../directives/ModalConfirm';
 import ContatoPessoaCad from '../cadastro/ContatoPessoaCad';
 
-class ContatoList extends React.Component {
+class ContatoPessoaList extends React.Component {
 
   constructor(props) {
     super(props);
@@ -138,4 +138,4 @@ class ContatoList extends React.Component {
 
 };
 
-export default ContatoList;
+export default ContatoPessoaList;
