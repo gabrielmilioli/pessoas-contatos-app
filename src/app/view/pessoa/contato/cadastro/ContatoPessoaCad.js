@@ -22,9 +22,13 @@ class ContatoPessoaCad extends React.Component {
 
   state = {
     show: this.show,
-    item: {},
+    item: {
+      nome: '',
+      pessoa: '',
+      telefone: '',
+      email: ''
+    },
     modalConfirmarRemover: false,
-    itemToDelete: {},
     editando: false,
     title: 'Adicionando contato',
     select: { pessoa: [] }
@@ -88,24 +92,24 @@ class ContatoPessoaCad extends React.Component {
   };
 
   deletar = () => {
-    this.service.deletar(this.state.itemToDelete.id)
+    const item = this.state.item;
+
+    this.service.deletar(item.id)
       .then(() => {
-        Notification.show('success', 'O contato ' + this.state.itemToDelete.descricao + ' foi removido.');
+        Notification.show('success', 'O contato ' + item.nome + ' foi removido.');
         this.close();
       }).catch(error => {
         Notification.show('error', error);
       });
 
     this.setState({
-      modalConfirmarRemover: false,
-      itemToDelete: {}
+      modalConfirmarRemover: false
     });
   };
 
   openModalConfirm = () => {
     this.setState({
-      modalConfirmarRemover: true,
-      itemToDelete: this.state.item
+      modalConfirmarRemover: true
     });
   };
 
@@ -148,7 +152,7 @@ class ContatoPessoaCad extends React.Component {
                   <Form.Label>Nome</Form.Label>
                   <Form.Control type="text" placeholder="Nome" name="nome"
                     onChange={this.onChangeCampo}
-                    value={this.state.item.nome}
+                    defaultValue={this.state.item.nome}
                     required={true} />
                 </Form.Group>
               </Form.Row>
@@ -157,7 +161,7 @@ class ContatoPessoaCad extends React.Component {
                   <Form.Label>Pessoa</Form.Label>
                   {this.state.select.pessoa.length &&
                     <Select placeholder="Pessoa" name="pessoa"
-                      onChange={this.onChangeCampo} value={this.state.item.pessoa}
+                      onChange={this.onChangeCampo} defaultValue={this.state.item.pessoa}
                       required={true}
                       values={this.state.select.pessoa}
                       property="nome" />
@@ -166,7 +170,7 @@ class ContatoPessoaCad extends React.Component {
                 <Form.Group as={Col} controlId="fgTelefone">
                   <Form.Label>Telefone</Form.Label>
                   <InputMask mask="(99) 99999-9999"
-                    value={FormatterUtils.formatTelefone(this.state.item.telefone)}
+                    defaultValue={FormatterUtils.formatTelefone(this.state.item.telefone)}
                     onChange={this.onChangeCampo}>
                     {
                       (inputProps) => (
@@ -181,7 +185,7 @@ class ContatoPessoaCad extends React.Component {
                 <Form.Group as={Col} controlId="fgEmail">
                   <Form.Label>E-mail</Form.Label>
                   <Form.Control type="email" placeholder="E-mail" name="email"
-                    value={this.state.item.email}
+                    defaultValue={this.state.item.email}
                     onChange={this.onChangeCampo}
                     required={true}
                     maxLength="100" />

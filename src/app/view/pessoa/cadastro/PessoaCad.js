@@ -19,9 +19,12 @@ class PessoaCad extends React.Component {
 
   state = {
     show: this.show,
-    item: {},
+    item: {
+      nome: '',
+      cpf: '',
+      dataNascimento: ''
+    },
     modalConfirmarRemover: false,
-    itemToDelete: {},
     editando: false,
     title: 'Adicionando pessoa'
   };
@@ -43,7 +46,11 @@ class PessoaCad extends React.Component {
       }
 
       this.setState({
-        item: item || {},
+        item: item || {
+          nome: '',
+          cpf: '',
+          dataNascimento: ''
+        },
         editando: !!item.id,
         title: (!!item.id ? 'Editando' : 'Adicionando') + ' pessoa'
       });
@@ -75,24 +82,24 @@ class PessoaCad extends React.Component {
   };
 
   deletar = () => {
-    this.service.deletar(this.state.itemToDelete.id)
+    const item = this.state.item;
+
+    this.service.deletar(item.id)
       .then(() => {
-        Notification.show('success', 'A pessoa ' + this.state.itemToDelete.descricao + ' foi removida.');
+        Notification.show('success', 'A pessoa ' + item.nome + ' foi removida.');
         this.close();
       }).catch(error => {
         Notification.show('error', error);
       });
 
     this.setState({
-      modalConfirmarRemover: false,
-      itemToDelete: {}
+      modalConfirmarRemover: false
     });
   };
 
   openModalConfirm = () => {
     this.setState({
-      modalConfirmarRemover: true,
-      itemToDelete: this.state.item
+      modalConfirmarRemover: true
     });
   };
 

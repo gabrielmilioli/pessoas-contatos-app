@@ -41,7 +41,7 @@ class Select extends React.Component {
     return (
       <div style={{ position: 'relative' }}>
         <Form.Control as="select" placeholder={this.placeholder} name={this.name}
-          onChange={this.change} required={this.required} value={this.state.value}>
+          onChange={this.change} required={this.required} defaultValue={this.state.value}>
           {!this.required &&
             <option value=""></option>
           }

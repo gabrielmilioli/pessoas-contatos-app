@@ -166,13 +166,13 @@ class Pessoa extends React.Component {
                       <td className="space-evenly">
                         <OverlayTrigger placement="bottom"
                           overlay={<Tooltip>Editar</Tooltip>}>
-                          <Button size="sm" variant="primary" onClick={() => this.openModalAdicionar(item)}>
+                          <Button size="sm" variant="dark" onClick={() => this.openModalAdicionar(item)}>
                             <BsPencil />
                           </Button>
                         </OverlayTrigger>
                         <OverlayTrigger placement="bottom"
                           overlay={<Tooltip>Remover</Tooltip>}>
-                          <Button size="sm" variant="primary" onClick={() => this.openModalConfirm(item)}>
+                          <Button size="sm" variant="danger" onClick={() => this.openModalConfirm(item)}>
                             <BsTrash />
                           </Button>
                         </OverlayTrigger>
