@@ -1,5 +1,5 @@
 import React from 'react';
-import { Col, Form, Button, Modal } from 'react-bootstrap';
+import { Col, Form, Button, Modal, Spinner } from 'react-bootstrap';
 import ContatoPessoaService from '../../../../service/pessoa/contato/ContatoPessoaService';
 import PessoaService from '../../../../service/pessoa/PessoaService';
 import ModalConfirm from '../../../../directives/ModalConfirm';
@@ -22,21 +22,17 @@ class ContatoPessoaCad extends React.Component {
 
   state = {
     show: this.show,
-    item: {
-      nome: '',
-      pessoa: '',
-      telefone: '',
-      email: ''
-    },
+    item: {},
     modalConfirmarRemover: false,
     editando: false,
     title: 'Adicionando contato',
-    select: { pessoa: [] }
+    select: { pessoa: [] },
+    loading: true
   };
 
   componentWillReceiveProps(props) {
     if (props.show !== this.state.show) {
-      this.setState({ show: props.show });
+      this.setState({ show: props.show, item: {} });
       if (!props.show) {
         return;
       }
@@ -44,27 +40,43 @@ class ContatoPessoaCad extends React.Component {
 
     if (props.item !== this.state.item) {
       const item = props.item || {};
-
-      if (item.telefone) {
-        item.telefone = item.telefone.replace(/\D/g, '');
+      if (item && item.id) {
+        this.setState({ loading: true });
+        this.service.obterPorId(item.id)
+          .then((result) => {
+            this.inicializaCampos(result.data || {});
+            this.setState({ loading: false });
+          }).catch(error => {
+            Notification.show('error', error);
+          });
+        return;
       }
 
-      this.pessoaService.buscar()
-        .then((response) => {
-          this.setState({
-            select: {
-              pessoa: response.data.content
-            }
-          });
-        })
-
-      this.setState({
-        item: item || {},
-        editando: !!item.id,
-        title: (!!item.id ? 'Editando' : 'Adicionando') + ' contato'
-      });
+      this.inicializaCampos(item);
     }
   }
+
+  inicializaCampos = (item) => {
+    if (item.telefone) {
+      item.telefone = item.telefone.replace(/\D/g, '');
+    }
+
+    this.pessoaService.buscar()
+      .then((response) => {
+        this.setState({
+          select: {
+            pessoa: response.data.content.map((c) => { delete c.contatos; return c; })
+          }
+        });
+      })
+
+    this.setState({
+      item: item || {},
+      editando: !!item.id,
+      title: (!!item.id ? 'Editando' : 'Adicionando') + ' contato',
+      loading: false
+    });
+  };
 
   salvar = () => {
     const item = this.state.item;
@@ -124,6 +136,10 @@ class ContatoPessoaCad extends React.Component {
     const name = e.target.name;
     let item = this.state.item || {};
 
+    if (e.required && item.pessoa) {
+      value = item.pessoa;
+    }
+
     if (name === 'telefone') {
       value = value.replace(/\D/g, '');
     }
@@ -143,68 +159,74 @@ class ContatoPessoaCad extends React.Component {
 
         <Modal show={this.state.show} size="lg" onHide={this.close}>
           <Form>
-            <Modal.Header closeButton>
-              <Modal.Title as="h5">{this.state.title}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Form.Row>
-                <Form.Group as={Col} controlId="fgNome">
-                  <Form.Label>Nome</Form.Label>
-                  <Form.Control type="text" placeholder="Nome" name="nome"
-                    onChange={this.onChangeCampo}
-                    defaultValue={this.state.item.nome}
-                    required={true} />
-                </Form.Group>
-              </Form.Row>
-              <Form.Row>
-                <Form.Group as={Col} controlId="fgPessoa">
-                  <Form.Label>Pessoa</Form.Label>
-                  {this.state.select.pessoa.length &&
-                    <Select placeholder="Pessoa" name="pessoa"
-                      onChange={this.onChangeCampo} defaultValue={this.state.item.pessoa}
-                      required={true}
-                      values={this.state.select.pessoa}
-                      property="nome" />
-                  }
-                </Form.Group>
-                <Form.Group as={Col} controlId="fgTelefone">
-                  <Form.Label>Telefone</Form.Label>
-                  <InputMask mask="(99) 99999-9999"
-                    defaultValue={FormatterUtils.formatTelefone(this.state.item.telefone)}
-                    onChange={this.onChangeCampo}>
-                    {
-                      (inputProps) => (
-                        <Form.Control type="text" placeholder="Telefone" name="telefone"
-                          {...inputProps}
+            {this.state.loading ?
+              <Spinner animation="border" variant="primary" />
+              :
+              <>
+                <Modal.Header closeButton>
+                  <Modal.Title as="h5">{this.state.title}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <Form.Row>
+                    <Form.Group as={Col} controlId="fgNome">
+                      <Form.Label>Nome</Form.Label>
+                      <Form.Control type="text" placeholder="Nome" name="nome"
+                        onChange={this.onChangeCampo}
+                        defaultValue={this.state.item.nome}
+                        required={true} />
+                    </Form.Group>
+                  </Form.Row>
+                  <Form.Row>
+                    <Form.Group as={Col} controlId="fgPessoa">
+                      <Form.Label>Pessoa</Form.Label>
+                      {this.state.select.pessoa.length &&
+                        <Select placeholder="Pessoa" name="pessoa"
+                          onChange={this.onChangeCampo} value={this.state.item.pessoa}
                           required={true}
-                          maxLength="23" />
-                      )
-                    }
-                  </InputMask>
-                </Form.Group>
-                <Form.Group as={Col} controlId="fgEmail">
-                  <Form.Label>E-mail</Form.Label>
-                  <Form.Control type="email" placeholder="E-mail" name="email"
-                    defaultValue={this.state.item.email}
-                    onChange={this.onChangeCampo}
-                    required={true}
-                    maxLength="100" />
-                </Form.Group>
-              </Form.Row>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="dark" onClick={this.salvar}>
-                Salvar
-              </Button>
-              {this.state.editando &&
-                <Button variant="danger" onClick={this.openModalConfirm}>
-                  Remover
-                </Button>
-              }
-              <Button variant="light" onClick={this.close}>
-                Cancelar
-              </Button>
-            </Modal.Footer>
+                          options={this.state.select.pessoa}
+                          property="nome" />
+                      }
+                    </Form.Group>
+                    <Form.Group as={Col} controlId="fgTelefone">
+                      <Form.Label>Telefone</Form.Label>
+                      <InputMask mask="(99) 99999-9999"
+                        value={FormatterUtils.formatTelefone(this.state.item.telefone)}
+                        onChange={this.onChangeCampo}>
+                        {
+                          (inputProps) => (
+                            <Form.Control type="text" placeholder="Telefone" name="telefone"
+                              {...inputProps}
+                              required={true}
+                              maxLength="23" />
+                          )
+                        }
+                      </InputMask>
+                    </Form.Group>
+                    <Form.Group as={Col} controlId="fgEmail">
+                      <Form.Label>E-mail</Form.Label>
+                      <Form.Control type="email" placeholder="E-mail" name="email"
+                        defaultValue={this.state.item.email}
+                        onChange={this.onChangeCampo}
+                        required={true}
+                        maxLength="100" />
+                    </Form.Group>
+                  </Form.Row>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="dark" onClick={this.salvar}>
+                    Salvar
+                  </Button>
+                  {this.state.editando &&
+                    <Button variant="danger" onClick={this.openModalConfirm}>
+                      Remover
+                    </Button>
+                  }
+                  <Button variant="light" onClick={this.close}>
+                    Cancelar
+                  </Button>
+                </Modal.Footer>
+              </>
+            }
           </Form>
         </Modal>
       </>

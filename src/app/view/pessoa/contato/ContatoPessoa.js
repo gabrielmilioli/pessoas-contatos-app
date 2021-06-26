@@ -1,25 +1,15 @@
 import React from 'react';
-import { Card, Form, Button, Table, Badge, OverlayTrigger, Tooltip, Container } from 'react-bootstrap';
-import { BsTrash, BsPencil } from 'react-icons/bs';
+import { Card, Form, Button, Container, Spinner } from 'react-bootstrap';
 import ContatoPessoaService from '../../../service/pessoa/contato/ContatoPessoaService';
-import FormatterUtils from '../../../utils/FormatterUtils';
-import ModalConfirm from '../../../directives/ModalConfirm';
 import Notification from '../../../directives/Notification';
 import ContatoPessoaCad from './cadastro/ContatoPessoaCad';
+import ContatoList from './listagem/ContatoList';
 
 class ContatoPessoa extends React.Component {
 
   constructor() {
     super();
     this.service = new ContatoPessoaService();
-
-    this.columns = [
-      { label: 'Código', model: 'id', width: '100', show: true },
-      { label: 'Nome', model: 'nome', show: true },
-      { label: 'Telefone', model: 'telefone', width: '180', show: true },
-      { label: 'E-mail', model: 'email', width: '180', show: true },
-      { label: 'Pessoa', model: 'pessoa', show: true }
-    ];
   }
 
   state = {
@@ -28,21 +18,30 @@ class ContatoPessoa extends React.Component {
       empty: true
     },
     modalAdicionar: false,
-    modalConfirmarRemover: false,
-    itemToManipulate: {}
+    itemToManipulate: {},
+    loading: true
   };
 
   buscar = () => {
     const params = {};
 
+    this.setState({ loading: true });
+
+    this.setState({
+      page: {
+        content: [],
+        empty: true
+      }
+    });
+
     this.service.buscar(params)
       .then(response => {
-        console.log(response.data);
         this.setState({
           page: {
             content: response.data.content,
             empty: response.data.empty
-          }
+          },
+          loading: false
         });
       }).catch(error => {
         Notification.show('error', error);
@@ -64,13 +63,6 @@ class ContatoPessoa extends React.Component {
       });
   };
 
-  openModalConfirm = (item) => {
-    this.setState({
-      modalConfirmarRemover: true,
-      itemToManipulate: item
-    });
-  };
-
   openModalAdicionar = (item) => {
     this.setState({
       modalAdicionar: true,
@@ -86,22 +78,9 @@ class ContatoPessoa extends React.Component {
     this.buscar();
   };
 
-  onCloseModalConfirm = () => {
-    this.setState({
-      modalConfirmarRemover: false,
-      itemToManipulate: {}
-    });
-  };
-
   render() {
     return (
       <>
-        <ModalConfirm title="Confirmar exclusão"
-          show={this.state.modalConfirmarRemover}
-          onConfirm={this.deletar}>
-          Deseja realmente remover este contato?
-        </ModalConfirm>
-
         <ContatoPessoaCad item={this.state.itemToManipulate}
           show={this.state.modalAdicionar} onClose={this.onCloseModalAdicionar} />
 
@@ -124,48 +103,11 @@ class ContatoPessoa extends React.Component {
         </Card>
 
         <Container fluid className="list-container">
-          <>
-            {this.state.page.empty ?
-              <h5 className="text-center">Nenhum item encontrado</h5>
-              :
-              <Table hover>
-                <thead>
-                  <tr>
-                    {this.columns.map((column, index) => (
-                      column.show &&
-                      <th key={index} width={column.width}>{column.label}</th>
-                    ))}
-                    <th width="120"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.state.page.content.map((item, index) => (
-                    <tr key={index}>
-                      <td><Badge pill variant="primary" className="full-width">{item.id}</Badge></td>
-                      <td>{item.nome}</td>
-                      <td>{FormatterUtils.formatTelefone(item.telefone)}</td>
-                      <td>{item.email}</td>
-                      <td>{item.pessoa.nome}</td>
-                      <td className="space-evenly">
-                        <OverlayTrigger placement="bottom"
-                          overlay={<Tooltip>Editar</Tooltip>}>
-                          <Button size="sm" variant="dark" onClick={() => this.openModalAdicionar(item)}>
-                            <BsPencil />
-                          </Button>
-                        </OverlayTrigger>
-                        <OverlayTrigger placement="bottom"
-                          overlay={<Tooltip>Remover</Tooltip>}>
-                          <Button size="sm" variant="danger" onClick={() => this.openModalConfirm(item)}>
-                            <BsTrash />
-                          </Button>
-                        </OverlayTrigger>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            }
-          </>
+          {this.state.loading ?
+            <Spinner animation="border" variant="primary" />
+            :
+            <ContatoList page={this.state.page} reload={this.buscar} />
+          }
         </Container>
 
       </>

@@ -37,7 +37,6 @@ class Pessoa extends React.Component {
 
     this.service.buscar(params)
       .then(response => {
-        console.log(response.data);
         this.setState({
           page: {
             content: response.data.content,

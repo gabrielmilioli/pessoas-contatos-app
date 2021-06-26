@@ -9,13 +9,13 @@ class Select extends React.Component {
     this.required = props.required || false;
     this.value = props.value;
     this.onChange = props.onChange;
-    this.values = props.values;
+    this.options = props.options;
     this.name = props.name;
     this.property = props.property;
 
     if (this.required) {
       this.onChange({
-        target: { value: this.values[0].id, name: this.name }
+        target: { value: this.options[0].id, name: this.name }, required: true
       });
     }
   }
@@ -37,16 +37,32 @@ class Select extends React.Component {
     }
   }
 
+  componentWillReceiveProps(props) {
+    if (typeof props.value === 'object') {
+      const propValue = props.value || {};
+      const stateValue = this.state.value || {};
+      if (propValue.id !== stateValue.id) {
+        this.setState({ value: propValue.id });
+        return;
+      }
+    }
+    
+    if (props.value !== this.state.value) {
+      this.setState({ value: props.value });
+      return;
+    }
+  }
+
   render() {
     return (
       <div style={{ position: 'relative' }}>
         <Form.Control as="select" placeholder={this.placeholder} name={this.name}
-          onChange={this.change} required={this.required} defaultValue={this.state.value}>
+          onChange={this.onChange} required={this.required} value={this.state.value}>
           {!this.required &&
             <option value=""></option>
           }
-          {this.values.map((item, index) => (
-            <option key={index} value={item.id}>{item[[this.property]]}</option>
+          {this.options.map((item, index) => (
+            <option key={index} value={item.id}>{item[this.property]}</option>
           ))}
         </Form.Control>
 
