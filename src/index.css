@@ -11,3 +11,66 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+html, body, #root, #root > div {
+  height: 100%;
+}
+
+.float-right {
+  float: right;
+}
+
+.main-container {
+  max-width: 85rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.list-container {
+  padding: 0px !important;
+}
+
+.container-fluid {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.table td, .table th {
+  vertical-align: middle !important;
+}
+
+.text-muted {
+  color: gray;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.space-evenly {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+button > svg {
+  margin-top: -3px;
+}
+
+.no-padding {
+  padding: 0px;
+}
+
+.Toastify__toast--info {
+  background: #007bff !important;
+}
+.Toastify__toast--success {
+  background: #28a745 !important;
+}
+.Toastify__toast--error {
+  background: #dc3545 !important;
+}
+.Toastify__toast--warning {
+  background: #ffc107 !important;
+}
