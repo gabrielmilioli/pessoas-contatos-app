@@ -34,12 +34,13 @@ class PessoaCad extends React.Component {
     },
     modalConfirmarRemover: false,
     editando: false,
-    title: 'Adicionando pessoa'
+    title: 'Adicionando pessoa',
+    loading: true
   };
 
   componentWillReceiveProps(props) {
     if (props.show !== this.state.show) {
-      this.setState({ show: props.show });
+      this.setState({ show: props.show, item: {} });
       if (!props.show) {
         return;
       }
@@ -47,24 +48,42 @@ class PessoaCad extends React.Component {
 
     if (props.item !== this.state.item) {
       const item = props.item || {};
-
-      if (item.dataNascimento) {
-        const data = item.dataNascimento.replace(/\D/g, '');
-        item.dataNascimento = data.substring(6, 8) + data.substring(4, 6) + data.substring(0, 4);
+      if (item && item.id) {
+        this.setState({ loading: true });
+        this.service.obterPorId(item.id)
+          .then((result) => {
+            this.inicializaCampos(result.data || {});
+            this.setState({ loading: false });
+          }).catch(error => {
+            Notification.show('error', error);
+          });
+        return;
       }
 
-      this.setState({
-        item: item || {
-          nome: '',
-          cpf: '',
-          dataNascimento: '',
-          contatos: []
-        },
-        editando: !!item.id,
-        title: (!!item.id ? 'Editando' : 'Adicionando') + ' pessoa'
-      });
+      this.inicializaCampos(item);
     }
   }
+
+  inicializaCampos = (item) => {
+    if (item.dataNascimento) {
+      const data = item.dataNascimento.replace(/\D/g, '');
+      item.dataNascimento = data.substring(6, 8) + data.substring(4, 6) + data.substring(0, 4);
+    }
+
+    item.contatos = item.contatos || [];
+
+    this.setState({
+      item: item || {
+        nome: '',
+        cpf: '',
+        dataNascimento: '',
+        contatos: []
+      },
+      editando: !!item.id,
+      title: (!!item.id ? 'Editando' : 'Adicionando') + ' pessoa',
+      loading: false
+    });
+  };
 
   salvar = () => {
     const item = this.state.item;
