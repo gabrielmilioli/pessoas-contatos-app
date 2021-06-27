@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const HTTP_CLIENT = axios.create({
-  baseURL: 'http://localhost:8080/api'
+  //baseURL: 'http://localhost:8080/api'
+  baseURL: 'https://milioli-pessoascontatos-api.herokuapp.com/api'
 });
 
 class ApiService {
