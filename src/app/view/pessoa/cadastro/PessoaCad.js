@@ -241,7 +241,7 @@ class PessoaCad extends React.Component {
 
               <Form.Row>
                 {!this.hasContatos() ?
-                  <h5 style={{ margin: '20px auto' }}>Nenhum contato foi adicionado ainda. <a href="#" onClick={this.adicionarContato}>Adicionar</a></h5>
+                  <h5 style={{ margin: '20px auto' }}>Nenhum contato foi adicionado ainda. <a href="#/" onClick={this.adicionarContato}>Adicionar</a></h5>
                   :
                   <>
                     <Table hover>
