@@ -57,7 +57,8 @@ class PessoaCad extends React.Component {
         item: item || {
           nome: '',
           cpf: '',
-          dataNascimento: ''
+          dataNascimento: '',
+          contatos: []
         },
         editando: !!item.id,
         title: (!!item.id ? 'Editando' : 'Adicionando') + ' pessoa'
@@ -73,12 +74,14 @@ class PessoaCad extends React.Component {
       return;
     }
 
+    const contatos = item.contatos || [];
+
     const params = {
       id: item.id,
       nome: item.nome,
       cpf: item.cpf.replace(/\D/g, ''),
       dataNascimento: FormatterUtils.formatDataToUs(item.dataNascimento),
-      contatos: item.contatos.map((c) => { c.telefone = c.telefone.replace(/\D/g, ''); return c; })
+      contatos: contatos.map((c) => { c.telefone = c.telefone.replace(/\D/g, ''); return c; })
     };
 
     this.service.salvar(params)
@@ -136,18 +139,23 @@ class PessoaCad extends React.Component {
   };
 
   onChangeCampoContato = (e) => {
-    let value = e.target.value;
-    let id = e.target.id.replace('campoContato-', '');
+    const value = e.target.value;
+    const id = e.target.id.replace('campoContato-', '');
     const name = e.target.name;
-    let item = this.state.item || {};
+    const item = this.state.item || {};
 
-    item.contatos[id][name] = value;
+    const contatos = item.contatos || [];
+    contatos[id][name] = value;
+    item.contatos = contatos;
+
     this.setState({ item: item });
   };
 
   removerContato = (index) => {
-    let item = this.state.item || {};
-    item.contatos.splice(index, 1);
+    const item = this.state.item || {};
+    const contatos = item.contatos || [];
+    contatos.splice(index, 1);
+    item.contatos = contatos;
 
     this.setState({ item: item });
   };
@@ -156,8 +164,8 @@ class PessoaCad extends React.Component {
     e.preventDefault();
     e.stopPropagation();
 
-    let item = this.state.item || {};
-    let contatos = item.contatos;
+    const item = this.state.item || {};
+    const contatos = item.contatos || [];
     contatos.push({
       nome: '',
       telefone: '',

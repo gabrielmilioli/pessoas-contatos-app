@@ -89,7 +89,7 @@ class ContatoPessoaCad extends React.Component {
     const params = {
       id: item.id,
       nome: item.nome,
-      pessoa: this.state.select.pessoa.find((p) => { return p.id = item.pessoa; }),
+      pessoa: this.state.select.pessoa.find((p) => { return p.id === (item.pessoa.id ? item.pessoa.id : parseInt(item.pessoa)); }),
       telefone: item.telefone.replace(/\D/g, ''),
       email: item.email
     };
