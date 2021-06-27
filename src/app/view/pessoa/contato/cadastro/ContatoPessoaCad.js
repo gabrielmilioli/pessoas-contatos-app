@@ -179,13 +179,11 @@ class ContatoPessoaCad extends React.Component {
                   <Form.Row>
                     <Form.Group as={Col} controlId="fgPessoa">
                       <Form.Label>Pessoa</Form.Label>
-                      {this.state.select.pessoa.length &&
-                        <Select placeholder="Pessoa" name="pessoa"
-                          onChange={this.onChangeCampo} value={this.state.item.pessoa}
-                          required={true}
-                          options={this.state.select.pessoa}
-                          property="nome" />
-                      }
+                      <Select placeholder="Pessoa" name="pessoa"
+                        onChange={this.onChangeCampo} value={this.state.item.pessoa}
+                        required={true}
+                        options={this.state.select.pessoa}
+                        property="nome" />
                     </Form.Group>
                     <Form.Group as={Col} controlId="fgTelefone">
                       <Form.Label>Telefone</Form.Label>

@@ -146,18 +146,16 @@ class ContatoPessoa extends React.Component {
                   <Form.Label>Nome</Form.Label>
                   <Form.Control type="text" placeholder="Nome" name="nome"
                     onChange={this.onChangeCampo}
-                    value={this.state.filtro.nome}/>
+                    value={this.state.filtro.nome} />
                 </Form.Group>
               </Form.Row>
               <Form.Row>
                 <Form.Group as={Col} controlId="fgPessoa">
                   <Form.Label>Pessoa</Form.Label>
-                  {this.state.select.pessoa.length &&
-                    <Select placeholder="Pessoa" name="pessoa"
-                      onChange={this.onChangeCampo} value={this.state.filtro.pessoa}
-                      options={this.state.select.pessoa}
-                      property="nome" />
-                  }
+                  <Select placeholder="Pessoa" name="pessoa"
+                    onChange={this.onChangeCampo} value={this.state.filtro.pessoa}
+                    options={this.state.select.pessoa}
+                    property="nome" />
                 </Form.Group>
                 <Form.Group as={Col} controlId="fgTelefone">
                   <Form.Label>Telefone</Form.Label>
