@@ -1,11 +1,12 @@
 import React from 'react';
-import { Card, Form, Button, Table, Badge, OverlayTrigger, Tooltip, Container, Popover, ListGroup } from 'react-bootstrap';
+import { Col, Card, Form, Button, Table, Badge, OverlayTrigger, Tooltip, Container, Popover, ListGroup } from 'react-bootstrap';
 import { BsTrash, BsPencil } from 'react-icons/bs';
 import PessoaService from '../../service/pessoa/PessoaService';
 import FormatterUtils from '../../utils/FormatterUtils';
 import ModalConfirm from '../../directives/ModalConfirm';
 import Notification from '../../directives/Notification';
 import PessoaCad from './cadastro/PessoaCad';
+import InputMask from 'react-input-mask';
 
 class Pessoa extends React.Component {
 
@@ -27,13 +28,24 @@ class Pessoa extends React.Component {
       content: [],
       empty: true
     },
+    filtro: {
+      nome: '',
+      cpf: '',
+      dataNascimento: ''
+    },
     modalAdicionar: false,
     modalConfirmarRemover: false,
     itemToManipulate: {}
   };
 
   buscar = () => {
-    const params = {};
+    const filtro = this.state.filtro;
+    
+    const params = {
+      nome: filtro.nome,
+      cpf: filtro.cpf.replace(/\D/g, ''),
+      dataNascimento: FormatterUtils.formatDataToUs(filtro.dataNascimento)
+    };
 
     this.service.buscar(params)
       .then(response => {
@@ -81,15 +93,40 @@ class Pessoa extends React.Component {
     this.setState({
       modalAdicionar: false,
       itemToManipulate: {}
-    });
-    this.buscar();
+    }, this.buscar);
   };
 
   onCloseModalConfirm = () => {
     this.setState({
       modalConfirmarRemover: false,
       itemToManipulate: {}
-    });
+    }, this.buscar);
+  };
+
+  onChangeCampo = (e) => {
+    let value = e.target.value;
+    const name = e.target.name;
+    let filtro = this.state.filtro || {};
+
+    if (name === 'cpf') {
+      value = FormatterUtils.formatCpf(value);
+    }
+
+    if (name === 'dataNascimento') {
+      value = value.replace(/\D/g, '');
+    }
+
+    filtro[name] = value;
+    this.setState({ filtro: filtro });
+  };
+
+  limpar = () => {
+    const filtro = {
+      nome: '',
+      cpf: '',
+      dataNascimento: ''
+    }
+    this.setState({ filtro: filtro }, this.buscar);
   };
 
   render() {
@@ -108,11 +145,47 @@ class Pessoa extends React.Component {
           <Card.Header as="h5">Pessoas</Card.Header>
           <Card.Body>
             <Form noValidate>
-              <Form.Group controlId="fgNome">
-                <Form.Label>Nome</Form.Label>
-                <Form.Control type="text" placeholder="Filtrar pelo nome"
-                  onChange={this.onChangeNome} />
-              </Form.Group>
+              <Form.Row>
+                <Form.Group as={Col} controlId="fgNome">
+                  <Form.Label>Nome</Form.Label>
+                  <Form.Control type="text" placeholder="Nome" name="nome"
+                    onChange={this.onChangeCampo}
+                    value={this.state.filtro.nome}
+                    required={true} />
+                </Form.Group>
+              </Form.Row>
+              <Form.Row>
+                <Form.Group as={Col} controlId="fgCpf">
+                  <Form.Label>CPF</Form.Label>
+                  <InputMask mask="999.999.999-99"
+                    value={FormatterUtils.formatCpf(this.state.filtro.cpf)}
+                    onChange={this.onChangeCampo}>
+                    {
+                      (inputProps) => (
+                        <Form.Control type="text" placeholder="CPF" name="cpf"
+                          {...inputProps}
+                          required={true}
+                          maxLength="28" />
+                      )
+                    }
+                  </InputMask>
+                </Form.Group>
+                <Form.Group as={Col} controlId="fgDataNascimento">
+                  <Form.Label>Data de nascimento</Form.Label>
+                  <InputMask mask="99/99/9999"
+                    value={this.state.filtro.dataNascimento}
+                    onChange={this.onChangeCampo}>
+                    {
+                      (inputProps) => (
+                        <Form.Control type="text" placeholder="Data de nascimento" name="dataNascimento"
+                          {...inputProps}
+                          required={true}
+                          maxLength="20" />
+                      )
+                    }
+                  </InputMask>
+                </Form.Group>
+              </Form.Row>
             </Form>
           </Card.Body>
           <Card.Footer>
@@ -145,8 +218,7 @@ class Pessoa extends React.Component {
                       <td>{FormatterUtils.formatCpf(item.cpf)}</td>
                       <td>{FormatterUtils.formatDataToBr(item.dataNascimento)}</td>
                       <td className="text-center">
-                        {
-                          item.contatos.length &&
+                        {item.contatos.length ?
                           <OverlayTrigger
                             placement="bottom"
                             overlay={
@@ -160,6 +232,8 @@ class Pessoa extends React.Component {
                             }>
                             <Badge pill variant="secondary">{item.contatos.length}</Badge>
                           </OverlayTrigger>
+                          :
+                          <Badge pill variant="secondary">{item.contatos.length}</Badge>
                         }
                       </td>
                       <td className="space-evenly">

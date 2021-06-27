@@ -25,7 +25,9 @@ class Select extends React.Component {
   };
 
   clear = () => {
-    this.change('');
+    this.change({
+      target: { value: '', name: this.name }
+    });
   };
 
   change = (e) => {

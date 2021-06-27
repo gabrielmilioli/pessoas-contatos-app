@@ -18,7 +18,7 @@ class ContatoPessoaService extends ApiService {
   }
 
   obterPorId(id) {
-    return this.get(id);
+    return this.getById(id);
   }
 
   deletar(id) {

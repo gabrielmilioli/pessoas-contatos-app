@@ -67,16 +67,14 @@ class ContatoPessoaList extends React.Component {
     this.setState({
       modalAdicionar: false,
       itemToManipulate: {}
-    });
-    this.reload();
+    }, this.reload);
   };
 
   onCloseModalConfirm = () => {
-    this.reload();
     this.setState({
       modalConfirmarRemover: false,
       itemToManipulate: {}
-    });
+    }, this.reload);
   };
 
   render() {

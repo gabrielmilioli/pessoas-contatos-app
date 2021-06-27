@@ -1,15 +1,28 @@
 import React from 'react';
-import { Card, Form, Button, Container, Spinner } from 'react-bootstrap';
+import { Col, Card, Form, Button, Container, Spinner } from 'react-bootstrap';
 import ContatoPessoaService from '../../../service/pessoa/contato/ContatoPessoaService';
+import PessoaService from '../../../service/pessoa/PessoaService';
 import Notification from '../../../directives/Notification';
 import ContatoPessoaCad from './cadastro/ContatoPessoaCad';
 import ContatoPessoaList from './listagem/ContatoPessoaList';
+import FormatterUtils from '../../../utils/FormatterUtils';
+import Select from '../../../directives/Select';
+import InputMask from 'react-input-mask';
 
 class ContatoPessoa extends React.Component {
 
   constructor() {
     super();
     this.service = new ContatoPessoaService();
+    this.pessoaService = new PessoaService();
+    this.pessoaService.buscar()
+      .then((response) => {
+        this.setState({
+          select: {
+            pessoa: response.data.content.map((c) => { delete c.contatos; return c; })
+          }
+        });
+      })
   }
 
   state = {
@@ -17,13 +30,27 @@ class ContatoPessoa extends React.Component {
       content: [],
       empty: true
     },
+    filtro: {
+      nome: '',
+      pessoa: '',
+      telefone: '',
+      email: ''
+    },
+    select: { pessoa: [] },
     modalAdicionar: false,
     itemToManipulate: {},
     loading: true
   };
 
   buscar = () => {
-    const params = {};
+    let filtro = this.state.filtro;
+
+    const params = {
+      nome: filtro.nome,
+      pessoa: filtro.pessoa,
+      telefone: filtro.telefone.replace(/\D/g, ''),
+      email: filtro.email
+    };
 
     this.setState({ loading: true });
 
@@ -74,8 +101,34 @@ class ContatoPessoa extends React.Component {
     this.setState({
       modalAdicionar: false,
       itemToManipulate: {}
-    });
-    this.buscar();
+    }, this.buscar);
+  };
+
+  onChangeCampo = (e) => {
+    let value = e.target.value;
+    const name = e.target.name;
+    let filtro = this.state.filtro || {};
+
+    if (name === 'cpf') {
+      value = FormatterUtils.formatCpf(value);
+    }
+
+    if (name === 'dataNascimento') {
+      value = value.replace(/\D/g, '');
+    }
+
+    filtro[name] = value;
+    this.setState({ filtro: filtro });
+  };
+
+  limpar = () => {
+    const filtro = {
+      nome: '',
+      pessoa: '',
+      telefone: '',
+      email: ''
+    }
+    this.setState({ filtro: filtro }, this.buscar);
   };
 
   render() {
@@ -88,11 +141,46 @@ class ContatoPessoa extends React.Component {
           <Card.Header as="h5">Contatos</Card.Header>
           <Card.Body>
             <Form noValidate>
-              <Form.Group controlId="fgNome">
-                <Form.Label>Nome</Form.Label>
-                <Form.Control type="text" placeholder="Filtrar pelo nome"
-                  onChange={this.onChangeNome} />
-              </Form.Group>
+              <Form.Row>
+                <Form.Group as={Col} controlId="fgNome">
+                  <Form.Label>Nome</Form.Label>
+                  <Form.Control type="text" placeholder="Nome" name="nome"
+                    onChange={this.onChangeCampo}
+                    value={this.state.filtro.nome}/>
+                </Form.Group>
+              </Form.Row>
+              <Form.Row>
+                <Form.Group as={Col} controlId="fgPessoa">
+                  <Form.Label>Pessoa</Form.Label>
+                  {this.state.select.pessoa.length &&
+                    <Select placeholder="Pessoa" name="pessoa"
+                      onChange={this.onChangeCampo} value={this.state.filtro.pessoa}
+                      options={this.state.select.pessoa}
+                      property="nome" />
+                  }
+                </Form.Group>
+                <Form.Group as={Col} controlId="fgTelefone">
+                  <Form.Label>Telefone</Form.Label>
+                  <InputMask mask="(99) 99999-9999"
+                    value={FormatterUtils.formatTelefone(this.state.filtro.telefone)}
+                    onChange={this.onChangeCampo}>
+                    {
+                      (inputProps) => (
+                        <Form.Control type="text" placeholder="Telefone" name="telefone"
+                          {...inputProps}
+                          maxLength="23" />
+                      )
+                    }
+                  </InputMask>
+                </Form.Group>
+                <Form.Group as={Col} controlId="fgEmail">
+                  <Form.Label>E-mail</Form.Label>
+                  <Form.Control type="email" placeholder="E-mail" name="email"
+                    value={this.state.filtro.email}
+                    onChange={this.onChangeCampo}
+                    maxLength="100" />
+                </Form.Group>
+              </Form.Row>
             </Form>
           </Card.Body>
           <Card.Footer>

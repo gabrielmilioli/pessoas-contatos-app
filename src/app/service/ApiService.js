@@ -14,7 +14,7 @@ class ApiService {
     return `${this.apiPath}/${url}`;
   }
 
-  get(path) {
+  getById(path) {
     return HTTP_CLIENT.get(this.requestUrl(path));
   }
 
