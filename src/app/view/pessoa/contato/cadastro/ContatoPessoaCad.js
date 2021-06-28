@@ -105,7 +105,6 @@ class ContatoPessoaCad extends React.Component {
 
   deletar = () => {
     const item = this.state.item;
-
     this.service.deletar(item.id)
       .then(() => {
         Notification.show('success', 'O contato ' + item.nome + ' foi removido.');

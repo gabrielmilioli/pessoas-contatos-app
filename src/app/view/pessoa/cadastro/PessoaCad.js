@@ -114,7 +114,6 @@ class PessoaCad extends React.Component {
 
   deletar = () => {
     const item = this.state.item;
-
     this.service.deletar(item.id)
       .then(() => {
         Notification.show('success', 'A pessoa ' + item.nome + ' foi removida.');

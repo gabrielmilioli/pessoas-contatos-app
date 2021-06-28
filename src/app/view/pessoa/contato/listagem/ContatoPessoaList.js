@@ -39,9 +39,10 @@ class ContatoPessoaList extends React.Component {
   }
 
   deletar = () => {
-    this.service.deletar(this.state.itemToManipulate.id)
+    const item = this.state.itemToManipulate;
+    this.service.deletar(item.id)
       .then(() => {
-        Notification.show('success', 'O contato ' + this.state.itemToManipulate.nome + ' foi removido.');
+        Notification.show('success', 'O contato ' + item.nome + ' foi removido.');
         this.onCloseModalConfirm();
         this.reload();
       }).catch(error => {

@@ -57,9 +57,10 @@ class Pessoa extends React.Component {
   }
 
   deletar = () => {
-    this.service.deletar(this.state.itemToManipulate.id)
+    const item = this.state.itemToManipulate;
+    this.service.deletar(item.id)
       .then(() => {
-        Notification.show('success', 'A pessoa ' + this.state.itemToManipulate.nome + ' foi removida.');
+        Notification.show('success', 'A pessoa ' + item.nome + ' foi removida.');
         this.onCloseModalConfirm();
         this.buscar();
       }).catch(error => {
