@@ -86,7 +86,7 @@ class PessoaCad extends React.Component {
   };
 
   salvar = () => {
-    const item = this.state.item;
+    const item = this.state.item || {};
 
     if (!this.service.validar(item)) {
       Notification.show('warning', 'Preencha corretamente os campos');
