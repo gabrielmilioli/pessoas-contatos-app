@@ -32,12 +32,19 @@ class Pessoa extends React.Component {
 
   buscar = () => {
     const filtro = this.state.filtro;
-    
+
     const params = {
       nome: filtro.nome,
       cpf: filtro.cpf.replace(/\D/g, ''),
       dataNascimento: FormatterUtils.formatDataToUs(filtro.dataNascimento)
     };
+
+    this.setState({
+      page: {
+        content: [],
+        empty: true
+      }
+    });
 
     this.service.buscar(params)
       .then(response => {
